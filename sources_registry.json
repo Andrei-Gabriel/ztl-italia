@@ -1,0 +1,36 @@
+{
+  "_note": "Registro delle fonti dati. 'osm' è la fonte di fallback a copertura nazionale. Le fonti 'ufficiale_comunale' hanno priorità e, quando presenti, sovrascrivono/arricchiscono i dati OSM per lo stesso comune.",
+
+  "osm": {
+    "tipo": "osm",
+    "nome_fonte": "OpenStreetMap (tag boundary=limited_traffic_zone)",
+    "url": "https://overpass-api.de/api/interpreter",
+    "formato": "overpass",
+    "licenza": "ODbL",
+    "copertura": "Italia (circa 350 comuni mappati alla data di scrittura)"
+  },
+
+  "comuni_ufficiali": [
+    {
+      "istat_code": "015146",
+      "nome": "Milano",
+      "tipo": "ufficiale_comunale",
+      "nome_fonte": "Comune di Milano - Open Data (DS51)",
+      "url": "https://dati.comune.milano.it/dataset/d7d9179a-8228-427f-9c86-1e30154be4fe/resource/d788b26b-31b4-4e57-992d-276a1280c8c2/download/disciplina_aree.geojson",
+      "formato": "geojson",
+      "licenza": "CC-BY-4.0",
+      "connector": "milano"
+    },
+    {
+      "istat_code": "048017",
+      "nome": "Firenze",
+      "tipo": "ufficiale_comunale",
+      "nome_fonte": "Comune di Firenze - Open Data (ZTL diurna)",
+      "url": "https://opendata.comune.fi.it/page_dataset_show?id=9257a75e-3af3-4845-b37d-1540be29115a",
+      "formato": "da_verificare",
+      "licenza": "CC-BY-3.0-IT",
+      "connector": "firenze",
+      "note": "Pagina catalogo: va risolto il link diretto alla risorsa scaricabile (WFS/GeoJSON) prima di attivare il connettore."
+    }
+  ]
+}

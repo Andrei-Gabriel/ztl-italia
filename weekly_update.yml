@@ -1,0 +1,27 @@
+name: Aggiornamento settimanale ZTL
+
+on:
+  schedule:
+    # Ogni lunedì alle 04:00 UTC (le 05:00 o 06:00 ora italiana, a seconda dell'ora legale)
+    - cron: "0 4 * * 1"
+  workflow_dispatch: {}  # permette anche l'avvio manuale da GitHub
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installa le dipendenze
+        run: pip install -r requirements.txt
+
+      - name: Esegui l'aggiornamento
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python -m scripts.update_db
