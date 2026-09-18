@@ -20,9 +20,20 @@ from psycopg2.extras import execute_values
  
 from scripts.common import content_hash, get_or_create_fonte, log_run
  
-OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+# Overpass a volte blocca/limita le richieste dagli IP condivisi dei runner
+# GitHub Actions. Proviamo più mirror pubblici in ordine, il primo che
+# risponde va bene. Se falliscono tutti, l'errore viene loggato per intero.
+OVERPASS_MIRRORS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.openstreetmap.ru/api/interpreter",
+]
 NOME_FONTE = "OpenStreetMap (boundary=limited_traffic_zone)"
 PAGE_SIZE = 500
+ 
+# Un User-Agent descrittivo è richiesto dalla policy d'uso di Overpass;
+# le richieste anonime/generiche vengono più facilmente bloccate.
+HEADERS = {"User-Agent": "ztl-italia-project/1.0 (progetto personale, no contatto pubblico)"}
  
 QUERY = """
 [out:json][timeout:180];
@@ -36,9 +47,18 @@ out body geom;
  
  
 def fetch():
-    resp = requests.post(OVERPASS_URL, data={"data": QUERY}, timeout=200)
-    resp.raise_for_status()
-    return resp.json()
+    ultimo_errore = None
+    for url in OVERPASS_MIRRORS:
+        try:
+            print(f"[osm] provo mirror: {url}")
+            resp = requests.post(url, data={"data": QUERY}, headers=HEADERS, timeout=200)
+            resp.raise_for_status()
+            print(f"[osm] mirror {url} ha risposto correttamente")
+            return resp.json()
+        except requests.RequestException as exc:
+            print(f"[osm] mirror {url} fallito: {exc}")
+            ultimo_errore = exc
+    raise ultimo_errore
  
  
 def _way_to_polygon_coords(geometry_points):
@@ -113,7 +133,7 @@ def run(conn):
         comune_istat=None,
         nome_fonte=NOME_FONTE,
         tipo="osm",
-        url=OVERPASS_URL,
+        url=OVERPASS_MIRRORS[0],
         formato="overpass",
         licenza="ODbL",
     )
@@ -121,14 +141,17 @@ def run(conn):
     try:
         data = fetch()
     except requests.RequestException as exc:
+        print(f"[osm] ERRORE: tutti i mirror Overpass hanno fallito: {exc}")
         log_run(conn, fonte_id, "errore", messaggio=str(exc))
         conn.commit()
         return
  
     comuni_con_coordinate = _load_comuni_con_coordinate(conn)
+    elementi_grezzi = data.get("elements", [])
+    print(f"[osm] Overpass ha restituito {len(elementi_grezzi)} elementi grezzi (way+relation)")
  
     rows = []
-    for el in data.get("elements", []):
+    for el in elementi_grezzi:
         mp = _element_to_multipolygon(el)
         if not mp:
             continue
