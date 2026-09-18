@@ -1,0 +1,24 @@
+name: Arricchisci comuni con lat/lon (una tantum)
+
+on:
+  workflow_dispatch: {}  # avviabile solo a mano da GitHub, tab Actions
+
+jobs:
+  enrich-lat-lon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installa le dipendenze
+        run: pip install -r requirements.txt
+
+      - name: Arricchisci i comuni con lat/lon
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python -m scripts.enrich_lat_lon
