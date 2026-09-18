@@ -188,6 +188,7 @@ def run(conn):
                     hash_contenuto = excluded.hash_contenuto,
                     aggiornato_il = now()
                 where ztl_zone.hash_contenuto is distinct from excluded.hash_contenuto
+                   or ztl_zone.comune_istat is distinct from excluded.comune_istat
                 returning (xmax = 0) as inserted
                 """,
                 rows,
