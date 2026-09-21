@@ -12,7 +12,7 @@ Uso:
     python -m scripts.update_db
 """
 from scripts.common import get_db_connection
-from scripts.connectors import firenze, milano, osm, torino, bologna
+from scripts.connectors import firenze, milano, osm, torino, bologna, verona
  
 # Aggiungere qui nuovi connettori comunali man mano che vengono scritti,
 # seguendo lo stesso pattern di scripts/connectors/milano.py
@@ -22,6 +22,7 @@ CONNETTORI = [
     ("firenze", firenze.run),
     ("torino", torino.run),
     ("bologna", bologna.run),
+    ("verona", verona.run),
 ]
  
  
