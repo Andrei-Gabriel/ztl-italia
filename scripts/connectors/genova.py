@@ -37,7 +37,7 @@ on conflict (fonte_id, external_id) do update set
 where ztl_zone.hash_contenuto is distinct from excluded.hash_contenuto
 returning (xmax = 0) as inserted
 """
-ROW_TEMPLATE = "(%s, %s, %s, %s, 'ZTL', ST_Multi(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326)), %s)"
+ROW_TEMPLATE = "(%s, %s, %s, %s, 'ZTL', ST_Multi(ST_Force2D(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326))), %s)"
 
 
 def fetch():
